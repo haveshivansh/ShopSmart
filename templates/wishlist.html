@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Wishlist — ShopSmart</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .wishlist-page {
+            padding-top: 55px;
+            padding-bottom: 70px;
+            min-height: 65vh;
+        }
+
+        .wishlist-heading {
+            margin-bottom: 30px;
+        }
+
+        .wishlist-heading h1 {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 24px;
+        }
+
+        .wishlist-card {
+            background: white;
+            border: 1px solid #e8eee9;
+            border-radius: 18px;
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+
+        .wishlist-image {
+            height: 210px;
+            background: #f4f7f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .wishlist-image img {
+            max-width: 100%;
+            max-height: 170px;
+            object-fit: contain;
+        }
+
+        .wishlist-details {
+            padding: 18px;
+        }
+
+        .wishlist-details h3 {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .wishlist-price {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 12px 0;
+        }
+
+        .wishlist-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .wishlist-actions form {
+            flex: 1;
+        }
+
+        .wishlist-actions button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .wishlist-cart-button {
+            background: #174c37;
+            color: white;
+            border: 1px solid #174c37;
+        }
+
+        .wishlist-remove-button {
+            background: white;
+            color: #b42332;
+            border: 1px solid #e6c7ca;
+        }
+
+        .wishlist-empty {
+            text-align: center;
+            padding: 65px 20px;
+            background: #f7f9f7;
+            border-radius: 18px;
+        }
+
+        .wishlist-empty .empty-heart {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="announcement">
+        Your saved finds, all in one place <span>✦</span> Shop smarter
+    </div>
+
+    <nav class="navbar shop-nav">
+        <div class="container">
+            <a class="navbar-brand brand" href="/">
+                <span class="brand-mark">S</span>
+                shop<span>smart</span><small> beta</small>
+            </a>
+
+            <div class="nav-actions">
+                <a href="/" class="nav-link-custom">Explore</a>
+
+                <a href="{{ url_for('view_cart') }}"
+                   class="nav-link-custom">
+                    🛒 My Cart
+                </a>
+
+                <a href="{{ url_for('order_history') }}"
+                   class="nav-link-custom">
+                    My Orders
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container wishlist-page">
+
+        <div class="wishlist-heading">
+            <div class="eyebrow">YOUR PERSONAL COLLECTION</div>
+            <h1>My <em>Wishlist.</em> ♡</h1>
+            <p>Your favourite products, saved for later.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show"
+                         role="alert">
+                        {{ message }}
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if items %}
+
+            <div class="wishlist-grid">
+
+                {% for item in items %}
+                    {% set product = item.product %}
+
+                    <article class="wishlist-card">
+
+                        <div class="wishlist-image">
+
+                            {% if product.image_url %}
+                                <img src="{{ product.image_url }}"
+                                     alt="{{ product.name }}"
+                                     loading="lazy">
+                            {% else %}
+                                <span style="font-size: 55px;">🛍️</span>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="wishlist-details">
+
+                            <small>{{ product.category }}</small>
+
+                            <h3>{{ product.name }}</h3>
+
+                            <p>{{ product.description }}</p>
+
+                            <div class="wishlist-price">
+                                ₹{{ "{:,.2f}".format(product.price) }}
+                            </div>
+
+                            <div class="wishlist-actions">
+
+                                <form action="{{ url_for('add_to_cart', product_id=product.id) }}"
+                                      method="POST">
+
+                                    <button type="submit"
+                                            class="wishlist-cart-button">
+                                        🛒 Add to Cart
+                                    </button>
+
+                                </form>
+
+                                <form action="{{ url_for('toggle_wishlist', product_id=product.id) }}"
+                                      method="POST">
+
+                                    <button type="submit"
+                                            class="wishlist-remove-button">
+                                        ♥ Remove
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="wishlist-empty">
+
+                <div class="empty-heart">♡</div>
+
+                <h2>Your wishlist is waiting</h2>
+
+                <p>You haven't saved any products yet.</p>
+
+                <a href="#"
+                   onclick="window.location.href='/'; return false;"
+                   class="btn-primary-custom">
+                    Explore Products ↗
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <a class="navbar-brand brand" href="/">
+                <span class="brand-mark">S</span>
+                shop<span>smart</span>
+            </a>
+
+            <p>Find your next favourite with ShopSmart.</p>
+
+            <span>© 2026 ShopSmart Demo</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

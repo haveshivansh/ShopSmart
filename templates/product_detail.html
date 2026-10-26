@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ product.name }} — ShopSmart</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .detail-page {
+            padding-top: 35px;
+            padding-bottom: 70px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 25px;
+            color: var(--deep);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .detail-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 45px;
+            align-items: start;
+        }
+
+        .detail-image-box {
+            min-height: 420px;
+            background: #edf0e4;
+            border-radius: 20px;
+            display: grid;
+            place-items: center;
+            padding: 35px;
+        }
+
+        .detail-image-box img {
+            width: 100%;
+            height: 350px;
+            object-fit: contain;
+        }
+
+        .detail-category {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: #718d3f;
+        }
+
+        .detail-info h1 {
+            font-family: "Manrope", sans-serif;
+            font-weight: 800;
+            font-size: clamp(28px, 4vw, 42px);
+            letter-spacing: -1.5px;
+            margin: 12px 0;
+        }
+
+        .detail-brand {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .detail-rating {
+            margin: 18px 0;
+            color: #b78127;
+            font-weight: 700;
+        }
+
+        .detail-price {
+            font-size: 30px;
+            font-weight: 800;
+            margin-top: 20px;
+        }
+
+        .detail-old-price {
+            font-size: 17px;
+            font-weight: 500;
+            color: #999;
+            margin-left: 8px;
+        }
+
+        .detail-stock {
+            margin: 15px 0;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .in-stock {
+            color: #35744a;
+        }
+
+        .out-stock {
+            color: #b42332;
+        }
+
+        .detail-description {
+            color: var(--muted);
+            line-height: 1.9;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .detail-actions button,
+        .detail-actions a {
+            padding: 13px 17px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .detail-cart {
+            background: var(--deep);
+            color: white;
+            border: 1px solid var(--deep);
+        }
+
+        .detail-wishlist {
+            background: white;
+            color: var(--deep);
+            border: 1px solid var(--line);
+        }
+
+        .detail-actions button:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .specification-box {
+            margin-top: 35px;
+            padding: 22px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+        }
+
+        .specification-box h2 {
+            font-family: "Manrope", sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .specification-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 12px;
+        }
+
+        .specification-row:last-child {
+            border-bottom: 0;
+        }
+
+        .specification-row span:first-child {
+            color: var(--muted);
+        }
+
+        .related-section {
+            margin-top: 65px;
+        }
+
+        .related-section h2 {
+            font-family: "Manrope", sans-serif;
+            font-weight: 800;
+            margin-bottom: 22px;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .related-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 15px;
+            text-decoration: none;
+            color: var(--ink);
+        }
+
+        .related-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+
+        .related-card h3 {
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .related-card p {
+            font-size: 14px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        @media(max-width: 767px) {
+            .detail-layout {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .detail-image-box {
+                min-height: 300px;
+            }
+
+            .detail-image-box img {
+                height: 250px;
+            }
+
+            .related-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="announcement">
+        Discover the details <span>✦</span> Choose smarter
+    </div>
+
+    <nav class="navbar shop-nav">
+        <div class="container">
+            <a class="navbar-brand brand" href="/">
+                <span class="brand-mark">S</span>
+                shop<span>smart</span><small> beta</small>
+            </a>
+
+            <div class="nav-actions">
+                <a href="/" class="nav-link-custom">Explore</a>
+
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('view_wishlist') }}"
+                       class="nav-link-custom">♡ My Wishlist</a>
+
+                    <a href="{{ url_for('view_cart') }}"
+                       class="nav-link-custom">🛒 My Cart</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}"
+                       class="nav-link-custom">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container detail-page">
+
+        <a href="/" class="back-link">← Back to products</a>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="detail-layout">
+
+            <div class="detail-image-box">
+                {% if product.image_url %}
+                    <img src="{{ product.image_url }}"
+                         alt="{{ product.name }}">
+                {% else %}
+                    <span style="font-size: 100px;">🛍️</span>
+                {% endif %}
+            </div>
+
+            <div class="detail-info">
+
+                <div class="detail-category">
+                    {{ product.category }}
+                </div>
+
+                <h1>{{ product.name }}</h1>
+
+                <div class="detail-brand">
+                    Brand: {{ product.brand or "Generic" }}
+                </div>
+
+                <div class="detail-rating">
+                    ★ {{ product.rating or 0 }}
+                    <span style="color: var(--muted); font-weight: 400;">
+                        · Demo rating
+                    </span>
+                </div>
+
+                <div class="detail-price">
+                    ₹{{ "{:,.2f}".format(product.price) }}
+
+                    {% if product.old_price %}
+                        <del class="detail-old-price">
+                            ₹{{ "{:,.2f}".format(product.old_price) }}
+                        </del>
+                    {% endif %}
+                </div>
+
+                <div class="detail-stock
+                    {% if product.stock > 0 %}in-stock{% else %}out-stock{% endif %}">
+                    {% if product.stock > 0 %}
+                        ✓ In stock ({{ product.stock }} available)
+                    {% else %}
+                        Currently out of stock
+                    {% endif %}
+                </div>
+
+                <p class="detail-description">
+                    {{ product.description or
+                       "No additional description is available for this product yet." }}
+                </p>
+
+                <div class="detail-actions">
+
+                    {% if current_user.is_authenticated %}
+
+                        <form action="{{ url_for('add_to_cart', product_id=product.id) }}"
+                              method="POST">
+
+                            <button type="submit"
+                                    class="detail-cart"
+                                    {% if product.stock <= 0 %}disabled{% endif %}>
+                                🛒 Add to Cart
+                            </button>
+                        </form>
+
+                        <form action="{{ url_for('toggle_wishlist', product_id=product.id) }}"
+                              method="POST">
+
+                            <button type="submit" class="detail-wishlist">
+                                ♡ Save for Later
+                            </button>
+                        </form>
+
+                    {% else %}
+
+                        <a href="{{ url_for('login') }}"
+                           class="detail-cart">
+                            Login to Shop
+                        </a>
+
+                        <a href="{{ url_for('login') }}"
+                           class="detail-wishlist">
+                            ♡ Save for Later
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="specification-box">
+                    <h2>Product Information</h2>
+
+                    <div class="specification-row">
+                        <span>Product</span>
+                        <strong>{{ product.name }}</strong>
+                    </div>
+
+                    <div class="specification-row">
+                        <span>Brand</span>
+                        <strong>{{ product.brand or "Generic" }}</strong>
+                    </div>
+
+                    <div class="specification-row">
+                        <span>Category</span>
+                        <strong>{{ product.category }}</strong>
+                    </div>
+
+                    <div class="specification-row">
+                        <span>Customer rating</span>
+                        <strong>★ {{ product.rating or 0 }} / 5</strong>
+                    </div>
+
+                    <div class="specification-row">
+                        <span>Availability</span>
+                        <strong>
+                            {% if product.stock > 0 %}
+                                In stock
+                            {% else %}
+                                Out of stock
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div class="specification-row">
+                        <span>Catalogue source</span>
+                        <strong>Demo product data</strong>
+                    </div>
+                </div>
+
+                <p style="font-size: 11px; color: var(--muted); margin-top: 15px;">
+                    Note: Product ratings and catalogue information are for
+                    demonstration purposes.
+                </p>
+
+            </div>
+
+        </section>
+
+        {% if related_products %}
+
+            <section class="related-section">
+                <h2>You may also like</h2>
+
+                <div class="related-grid">
+
+                    {% for related in related_products %}
+
+                        <a class="related-card"
+                           href="{{ url_for('product_detail', product_id=related.id) }}">
+
+                            {% if related.image_url %}
+                                <img src="{{ related.image_url }}"
+                                     alt="{{ related.name }}"
+                                     loading="lazy">
+                            {% else %}
+                                <div style="height: 150px; display: grid; place-items: center;">
+                                    🛍️
+                                </div>
+                            {% endif %}
+
+                            <h3>{{ related.name }}</h3>
+
+                            <p>₹{{ "{:,.2f}".format(related.price) }}</p>
+
+                        </a>
+
+                    {% endfor %}
+
+                </div>
+            </section>
+
+        {% endif %}
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <a class="navbar-brand brand" href="/">
+                <span class="brand-mark">S</span>
+                shop<span>smart</span>
+            </a>
+
+            <p>A BCA final-year project · ShopSmart Demo</p>
+
+            <span>© 2026 ShopSmart</span>
+        </div>
+    </footer>
+
+</body>
+</html>

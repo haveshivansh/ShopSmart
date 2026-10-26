@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart | ShopSmart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #fbfaf7;
+            color: #20231f;
+            font-family: Arial, sans-serif;
+        }
+
+        .page-container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .cart-card {
+            background: white;
+            border: 1px solid #e8e7df;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .product-image {
+            width: 85px;
+            height: 85px;
+            object-fit: contain;
+            background: #f4f3ed;
+            border-radius: 10px;
+            padding: 8px;
+        }
+
+        .shop-button {
+            background: #263b2d;
+            color: white;
+            border: 0;
+            border-radius: 7px;
+            padding: 10px 16px;
+            text-decoration: none;
+        }
+
+        .shop-button:hover {
+            background: #395640;
+            color: white;
+        }
+
+        .total-box {
+            background: white;
+            border: 1px solid #e8e7df;
+            border-radius: 14px;
+            padding: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-container">
+        <a href="/" class="text-decoration-none text-secondary">← Continue shopping</a>
+
+        <h1 class="mt-3 mb-4 fw-bold">Your Shopping Cart</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% if items %}
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    {% for item in items %}
+                        <div class="cart-card">
+                            <div class="d-flex gap-3 align-items-center">
+                                {% if item.product.image_url %}
+                                    <img
+                                        src="{{ item.product.image_url }}"
+                                        alt="{{ item.product.name }}"
+                                        class="product-image"
+                                    >
+                                {% else %}
+                                    <div class="product-image d-grid place-items-center">🛍️</div>
+                                {% endif %}
+
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1">
+                                        {{ item.product.name }}
+                                    </h5>
+
+                                    <p class="text-secondary small mb-2">
+                                        {{ item.product.category }}
+                                    </p>
+
+                                    <strong>
+                                        ₹{{ "%.2f"|format(item.product.price) }}
+                                    </strong>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('update_cart', item_id=item.id) }}"
+                                        class="d-flex gap-2 align-items-center mt-3"
+                                    >
+                                        <label for="quantity-{{ item.id }}" class="small">
+                                            Qty:
+                                        </label>
+
+                                        <input
+                                            id="quantity-{{ item.id }}"
+                                            type="number"
+                                            name="quantity"
+                                            min="1"
+                                            max="{{ item.product.stock }}"
+                                            value="{{ item.quantity }}"
+                                            class="form-control form-control-sm"
+                                            style="width: 75px"
+                                            required
+                                        >
+
+                                        <button class="btn btn-sm btn-outline-success">
+                                            Update
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="text-end">
+                                    <strong>
+                                        ₹{{ "%.2f"|format(item.product.price * item.quantity) }}
+                                    </strong>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('remove_from_cart', item_id=item.id) }}"
+                                        class="mt-3"
+                                    >
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="total-box">
+                        <h4 class="fw-bold">Order Summary</h4>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Subtotal</span>
+                            <strong>₹{{ "%.2f"|format(total) }}</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Shipping</span>
+                            <span>Free</span>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <strong>Total</strong>
+                            <strong>₹{{ "%.2f"|format(total) }}</strong>
+                        </div>
+
+                         <form action="{{ url_for('checkout') }}" method="POST">
+                            <button type="submit" class="shop-button w-100">
+                                Place Demo Order
+                            </button>
+                        </form>
+
+                        <p class="text-secondary small mt-3 mb-0">
+                            Demo project. No payment will be collected.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <div class="cart-card text-center py-5">
+                <div style="font-size: 55px;">🛒</div>
+                <h3 class="fw-bold mt-3">Your cart is empty</h3>
+                <p class="text-secondary">
+                    Explore our products and add something you like.
+                </p>
+                <a href="/" class="shop-button d-inline-block mt-2">
+                    Explore products
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

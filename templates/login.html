@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | ShopSmart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #fbfaf7;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+        .auth-card {
+            background: white;
+            width: 100%;
+            max-width: 430px;
+            padding: 35px;
+            border: 1px solid #e8e7df;
+            border-radius: 16px;
+        }
+        .brand { font-size: 27px; font-weight: 800; color: #263b2d; }
+        .btn-shop {
+            width: 100%;
+            background: #263b2d;
+            color: white;
+            padding: 12px;
+            font-weight: 700;
+        }
+        .btn-shop:hover { background: #395640; color: white; }
+        .form-control { padding: 11px; }
+        .muted { color: #777d75; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <a href="/" class="brand text-decoration-none">ShopSmart</a>
+        <h2 class="mt-4 fw-bold">Welcome back</h2>
+        <p class="muted">Log in to continue shopping.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-3">
+                <label class="form-label" for="email">Email address</label>
+                <input class="form-control" id="email" name="email"
+                       type="email" maxlength="150"
+                       autocomplete="email" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control" id="password" name="password"
+                       type="password" autocomplete="current-password" required>
+            </div>
+
+            <button class="btn btn-shop mt-2" type="submit">Log In</button>
+        </form>
+
+        <p class="text-center mt-4 mb-0 muted">
+            New to ShopSmart?
+            <a href="{{ url_for('register') }}">Create an account</a>
+        </p>
+    </div>
+</body>
+</html>
