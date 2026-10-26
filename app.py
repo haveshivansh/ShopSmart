@@ -1,3 +1,6 @@
+import os
+import requests
+
 from flask import (
     Flask,
     render_template,
@@ -29,7 +32,7 @@ from models import (
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "change-this-to-a-random-secret-before-deployment"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or os.urandom(32)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///shopsmart.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -172,8 +175,52 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
+def seed_products_if_empty():
+    """Populate a fresh deployment database with demo products."""
+    if Product.query.count() > 0:
+        app.logger.info("Product catalogue already contains products; skipping seed.")
+        return
+
+    api_url = "https://dummyjson.com/products?limit=100"
+    try:
+        response = requests.get(api_url, timeout=20)
+        response.raise_for_status()
+        products = response.json().get("products", [])
+
+        for item in products:
+            source_id = item.get("id")
+            if not source_id:
+                continue
+
+            product = Product.query.filter_by(source_id=source_id).first()
+            if product is None:
+                product = Product(source_id=source_id)
+                db.session.add(product)
+
+            product.name = item.get("title", "Unnamed Product")
+            product.category = item.get("category", "Other").title()
+            product.brand = item.get("brand") or "Generic"
+            product.price = float(item.get("price") or 0)
+            product.old_price = (
+                float(item["price"]) * 1.15
+                if item.get("price") is not None else None
+            )
+            product.rating = float(item.get("rating") or 0)
+            product.image_url = item.get("thumbnail") or ""
+            product.description = item.get("description", "")
+            product.stock = max(0, int(item.get("stock") or 0))
+            product.source = "DummyJSON"
+
+        db.session.commit()
+        app.logger.info("Demo product seed completed: %s products received.", len(products))
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Could not seed demo products; app will continue starting.")
+
+
 with app.app_context():
     db.create_all()
+    seed_products_if_empty()
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
